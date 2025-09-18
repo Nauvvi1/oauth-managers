@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OAuth Manager Demo</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>OAuth Manager Demo</h1>
+      <p class="muted">Google · GitHub · Discord · VK · Telegram</p>
+
+      <div id="authbox"></div>
+
+      <div class="row" style="margin-top:12px">
+        <a class="btn" href="/auth/google/start">Войти через Google</a>
+        <a class="btn" href="/auth/github/start">Войти через GitHub</a>
+        <a class="btn" href="/auth/discord/start">Войти через Discord</a>
+        <a class="btn" href="/auth/vk/start">Войти через VK</a>
+      </div>
+
+      <div style="margin-top:16px">
+        <!-- Telegram Login Widget -->
+        <script async src="https://telegram.org/js/telegram-widget.js?22"
+                data-size="large"
+                data-onauth="onTelegramAuth(user)"
+                data-request-access="write"></script>
+      </div>
+
+      <div id="debug" style="margin-top:16px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Ваш профиль</h2>
+      <div id="profile"></div>
+      <div style="margin-top:12px">
+        <button class="btn" id="logoutBtn">Выйти</button>
+      </div>
+    </div>
+
+    <div class="footer">Demo project — универсальный OAuth-менеджер</div>
+  </div>
+
+  <script>
+    async function fetchMe() {
+      const r = await fetch('/me');
+      if (!r.ok) {
+        document.getElementById('profile').innerHTML = '<div class="alert">Не авторизованы</div>';
+        return;
+      }
+      const data = await r.json();
+      if (!data.authenticated) {
+        document.getElementById('profile').innerHTML = '<div class="alert">Не авторизованы</div>';
+        return;
+      }
+      const u = data.user;
+      document.getElementById('profile').innerHTML = `
+        <div class="user">
+          <img src="${u.avatar_url || 'https://placehold.co/96x96?text=🙂'}" alt="avatar"/>
+          <div>
+            <div><b>${u.name || '—'}</b></div>
+            <div>${u.email || '—'}</div>
+            <div class="muted">provider: ${data.provider || 'n/a'}</div>
+          </div>
+        </div>
+        <pre>${JSON.stringify(u, null, 2)}</pre>
+      `;
+    }
+
+    function onTelegramAuth(user) {
+      const params = new URLSearchParams(user);
+      location.href = '/auth/telegram/callback?' + params.toString();
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      location.reload();
+    });
+
+    fetchMe().catch(console.error);
+  </script>
+</body>
+</html>
