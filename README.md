@@ -1,6 +1,14 @@
 
 # OAuth Manager Demo (Node.js + Express + Redis + PostgreSQL)
 
+Демо-проект универсального OAuth-менеджера
+Интеграция с популярными сервисами:
+
+- **Google**
+- **GitHub**
+- **Discord**
+- **VK**
+- **Telegram** (Login Widget)
 
 ## Стек
 - Node.js 18+, Express
